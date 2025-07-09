@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시트 제목 입력</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* 드래그 가능한 타이틀 바 */
+    .titlebar {
+      height: 40px;
+      background-color: #2c2c2c;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      -webkit-app-region: drag;
+    }
+    
+    /* 타이틀 영역 */
+    .titlebar-title {
+      display: flex;
+      align-items: center;
+    }
+    
+    /* 윈도우 컨트롤 버튼 */
+    .window-controls {
+      display: flex;
+      -webkit-app-region: no-drag;
+    }
+    
+    .window-control-button {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      margin-left: 5px;
+      border-radius: 3px;
+    }
+    
+    .window-control-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .window-control-button.close:hover {
+      background-color: #e81123;
+    }
+    
+    /* 콘텐츠 영역 */
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .logo {
+      font-size: 48px;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #007bff;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #loading {
+      color: #555;
+      font-weight: 500;
+    }
+    .error-message {
+      color: #dc3545;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f8d7da;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="titlebar-title">
+      <img src="./icon.ico" style="width:20px;height:20px;margin-right:8px;" alt="icon">
+    </div>
+    <div class="window-controls">
+      <button class="window-control-button minimize" id="minimize-btn"><i class="fas fa-minus"></i></button>
+      <button class="window-control-button maximize" id="maximize-btn"><i class="fas fa-expand"></i></button>
+      <button class="window-control-button close" id="close-btn"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="container">
+      <h1>AWS LoginPort</h1>
+    <div class="form-group" style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 25px;">
+      <input type="text" id="sheetTitle" placeholder="구글 시트 제목을 입력하세요" style="flex-grow: 1; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; height: 38px; box-sizing: border-box;">
+      <button id="submitBtn" style="background-color: #007bff; color: white; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer; height: 38px; white-space: nowrap;">실행</button>
+    </div>
+    <div id="loading" style="display: none; margin-top: 20px;">
+      <div class="spinner"></div>
+      <p>데이터를 불러오는 중입니다. 잠시만 기다려주세요...</p>
+    </div>
+    <div id="error-message" class="error-message"></div>
+    <div id="uploadContainer" style="margin-top: 30px; font-size:12px; text-align:center;">
+      <button type="button" id="uploadCredsBtn" style="background-color:#28a745; color: white; border: none; border-radius: 4px; padding: 6px 14px; font-size: 12px; cursor: pointer; margin-bottom: 1px;">Google Sheets API 인증 파일 업로드</button>
+      <div>
+        <span id="uploadCredsStatus" style="display:none; margin-left:6px; color:#28a745; font-size:12px;">완료</span>
+        <div id="credFileInfo" style="margin-top:8px; font-size:11px; color:#666; display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Electron과의 통신을 위한 코드
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 저장된 시트 제목 불러오기
+      try {
+        const savedTitle = await ipcRenderer.invoke('get-saved-sheet-title');
+        if (savedTitle) {
+          document.getElementById('sheetTitle').value = savedTitle;
+        }
+      } catch (error) {
+        console.error('저장된 시트 제목 불러오기 실패:', error);
+      }
+      
+      // 인증 JSON 업로드 처리
+      document.getElementById('uploadCredsBtn').addEventListener('click', async () => {
+        try {
+          const result = await ipcRenderer.invoke('open-credentials-dialog');
+          if (result.canceled) return;
+          if (result.error) {
+            alert(`업로드 실패: ${result.error}`);
+          } else {
+            const statusEl = document.getElementById('uploadCredsStatus');
+            statusEl.style.display = 'inline';
+            statusEl.textContent = '업로드 완료';
+            updateCredInfo(result.savedPath);
+          }
+        } catch (err) {
+          alert(`업로드 중 오류 발생: ${err.message}`);
+        }
+      });
+
+      // 폼 제출 처리
+      document.getElementById('submitBtn').addEventListener('click', () => {
+        const sheetTitle = document.getElementById('sheetTitle').value.trim();
+        if (sheetTitle) {
+          // 로딩 표시
+          document.getElementById('loading').style.display = 'block';
+          document.getElementById('submitBtn').disabled = true;
+          document.getElementById('submitBtn').textContent = '준비 중...';
+          
+          // 시트 제목 전송 및 응답 받기
+          ipcRenderer.send('submit-sheet-title', sheetTitle);
+          
+          // 응답 받기 - 로딩 완료 시
+          ipcRenderer.once('sheet-loading-complete', () => {
+            // 로딩 완료 후 자동으로 다음 단계로 진행됨
+          });
+          
+          // 오류 발생 시 처리
+          ipcRenderer.once('sheet-loading-error', (errorMessage) => {
+            // 로딩 누설 해제
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = '실행';
+            
+            // 오류 메시지 표시
+            const errorElement = document.getElementById('error-message');
+            errorElement.style.display = 'block';
+            errorElement.textContent = `오류 발생: ${errorMessage || '서버 연결 실패'}`;
+          });
+        } else {
+          alert('시트 제목을 입력해주세요.');
+        }
+      });
+      
+      // 엔터 키로 제출 처리
+      document.getElementById('sheetTitle').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('submitBtn').click();
+        }
+      });
+
+      // 초기 Credential 표시
+      try {
+        const credPath = await ipcRenderer.invoke('get-credentials-file');
+        updateCredInfo(credPath);
+      } catch {}
+
+      function updateCredInfo(path){
+        const infoEl = document.getElementById('credFileInfo');
+        if(path){
+          const name = path.split(/\\|\//).pop();
+          infoEl.textContent = `사용 중인 인증 파일: ${name}`;
+          infoEl.style.display = 'block';
+        } else {
+          infoEl.style.display = 'none';
+        }
+      }
+    });
+    
+    // 윈도우 컨트롤 이벤트 리스너
+    document.addEventListener('DOMContentLoaded', function() {
+      const minimizeBtn = document.getElementById('minimize-btn');
+      const maximizeBtn = document.getElementById('maximize-btn');
+      const closeBtn = document.getElementById('close-btn');
+      
+      if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', function() {
+          window.electron.ipcRenderer.send('window-control', 'minimize');
+        });
+      }
+      
+      if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', function() {
+          window.electron.ipcRenderer.send('window-control', 'maximize');
+        });
+      }
+      
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          window.electron.ipcRenderer.send('window-control', 'close');
+        });
+      }
+    });
+  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+</body>
+</html>

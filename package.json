@@ -1,0 +1,60 @@
+{
+  "name": "aws-login-port",
+  "version": "1.0.31",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "keywords": [],
+  "author": "Jaewoo Cho",
+  "license": "ISC",
+  "dependencies": {
+    "electron-store": "^10.1.0",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "googleapis": "^148.0.0",
+    "otplib": "^12.0.1",
+    "puppeteer": "^24.11.2"
+  },
+  "description": "AWS LoginPort",
+  "build": {
+    "compression": "maximum",
+    "npmRebuild": false,
+    "removePackageScripts": true,
+    "appId": "com.example.aws-login-port",
+    "productName": "AWS LoginPort",
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/electron",
+      "!**/node_modules/electron-builder"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "bespin-464808-5843cc63067d.json",
+      "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/chrome.exe",
+      "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/chrome_100_percent.pak",
+      "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/chrome_200_percent.pak",
+      "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/icudtl.dat",
+      "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/v8_context_snapshot.bin"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AWS LoginPort",
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^37.2.0"
+  }
+}
