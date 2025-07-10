@@ -309,6 +309,7 @@ app.get('/', async (req, res) => {
         .notification.show {
           opacity: 1;
         }
+          
         /* 드래그 가능한 타이틀 바 */
         .titlebar {
           height: 40px;

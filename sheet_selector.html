@@ -60,7 +60,6 @@
     .window-control-button.close:hover {
       background-color: #e81123;
     }
-    
     /* 콘텐츠 영역 */
     .content {
       flex: 1;
@@ -148,16 +147,16 @@
   </style>
 </head>
 <body>
-  <div class="titlebar">
-    <div class="titlebar-title">
-      <img src="./icon.ico" style="width:20px;height:20px;margin-right:8px;" alt="icon">
+    <div class="titlebar">
+      <div class="titlebar-title">
+        <img src="/icon.ico" style="width:20px;height:20px;margin-right:8px;" alt="icon">
+      </div>
+      <div class="window-controls">
+        <button class="window-control-button minimize" id="minimize-btn"><i class="fas fa-minus"></i></button>
+        <button class="window-control-button maximize" id="maximize-btn"><i class="fas fa-expand"></i></button>
+        <button class="window-control-button close" id="close-btn"><i class="fas fa-times"></i></button>
+      </div>
     </div>
-    <div class="window-controls">
-      <button class="window-control-button minimize" id="minimize-btn"><i class="fas fa-minus"></i></button>
-      <button class="window-control-button maximize" id="maximize-btn"><i class="fas fa-expand"></i></button>
-      <button class="window-control-button close" id="close-btn"><i class="fas fa-times"></i></button>
-    </div>
-  </div>
   <div class="content">
     <div class="container">
       <h1>AWS LoginPort</h1>
