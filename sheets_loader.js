@@ -16,7 +16,21 @@ const SCOPES = [
 ];
 
 function resolveCredentialPath(config, baseDir) {
-  // 1. app.asar.unpacked 디렉토리 확인 (패키지된 앱의 리소스)
+  // 1. config.json에 지정된 경로 확인 (우선순위 가장 높음)
+  if (config.credentials_file) {
+    let credFile = config.credentials_file;
+    if (!path.isAbsolute(credFile)) {
+      credFile = path.join(baseDir, credFile);
+    }
+    if (fs.existsSync(credFile)) {
+      console.log(`인증 파일을 config.json에 지정된 경로에서 찾음: ${credFile}`);
+      return credFile;
+    } else {
+      console.log(`config.json에 지정된 인증 파일을 찾을 수 없습니다: ${credFile}`);
+    }
+  }
+
+  // 2. app.asar.unpacked 디렉토리 확인 (패키지된 앱의 리소스)
   const unpackedDir = path.join(path.dirname(process.execPath), 'resources', 'app.asar.unpacked');
   const unpackedCredFile = path.join(unpackedDir, DEFAULT_CREDENTIAL_FILE);
   if (fs.existsSync(unpackedCredFile)) {
@@ -24,23 +38,11 @@ function resolveCredentialPath(config, baseDir) {
     return unpackedCredFile;
   }
 
-  // 2. 현재 디렉토리에서 기본 인증 파일 확인
+  // 3. 현재 디렉토리에서 기본 인증 파일 확인
   const localCredFile = path.join(path.dirname(process.execPath), DEFAULT_CREDENTIAL_FILE);
   if (fs.existsSync(localCredFile)) {
     console.log(`인증 파일을 현재 디렉토리에서 찾음: ${localCredFile}`);
     return localCredFile;
-  }
-
-  // 3. config.json에 지정된 경로 확인
-  if (config.credentials_file) {
-    let credFile = config.credentials_file;
-    if (!path.isAbsolute(credFile)) {
-      credFile = path.join(baseDir, credFile);
-    }
-    if (fs.existsSync(credFile)) {
-      console.log(`인증 파일을 config.json 경로에서 찾음: ${credFile}`);
-      return credFile;
-    }
   }
 
   // 4. AppData/Roaming/aws-login-port 디렉토리 확인

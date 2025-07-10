@@ -137,6 +137,7 @@ app.get('/', async (req, res) => {
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
       <style>
         body {
           padding: 0;
@@ -330,6 +331,26 @@ app.get('/', async (req, res) => {
         .titlebar-search {
           flex: 0 1 400px;
           -webkit-app-region: no-drag;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        
+        .qr-scan-btn {
+          background: transparent;
+          border: none;
+          color: #fff;
+          font-size: 16px;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .qr-scan-btn:hover {
+          background-color: rgba(255, 255, 255, 0.1);
         }
         
         /* 윈도우 컨트롤 버튼 */
@@ -398,6 +419,9 @@ app.get('/', async (req, res) => {
           </div>
           
           <div class="titlebar-search">
+            <button class="qr-scan-btn" title="QR 코드 스캔" onclick="openQrScanner()">
+              <i class="fas fa-qrcode"></i>
+            </button>
             <input type="text" id="searchInput" class="search-input" placeholder="계정명 또는 Account ID 검색" oninput="filterClients()">
           </div>
           
@@ -471,12 +495,7 @@ app.get('/', async (req, res) => {
           .then(data => {
             navigator.clipboard.writeText(data.mfaCode)
               .then(() => {
-                const notification = document.getElementById('notification');
-                notification.textContent = 'MFA 코드가 복사되었습니다: ' + data.mfaCode;
-                notification.classList.add('show');
-                setTimeout(() => {
-                  notification.classList.remove('show');
-                }, 2000);
+                showNotification('MFA 코드가 복사되었습니다: ' + data.mfaCode, 'success');
               })
               .catch(err => console.error('복사 실패:', err));
           })
@@ -539,6 +558,74 @@ app.get('/', async (req, res) => {
             });
           }
         });
+        
+        function openQrScanner() {
+          // 파일 입력 엘리먼트 생성
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          
+          // 파일 선택 시 처리
+          input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+              // FileReader로 이미지 로드
+              const imgData = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              
+              // 이미지 로드
+              const img = new Image();
+              await new Promise((resolve) => {
+                img.onload = resolve;
+                img.src = imgData;
+              });
+              
+              // 캔버스 생성 및 이미지 그리기
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx.drawImage(img, 0, 0, img.width, img.height);
+              
+              // jsQR로 QR 코드 인식
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'dontInvert',
+              });
+              
+              if (code) {
+                // QR 코드에서 secret 추출 (예: otpauth://totp/...?secret=...&...)
+                const secretMatch = code.data.match(/secret=([^&]+)/);
+                if (secretMatch && secretMatch[1]) {
+                  const secret = secretMatch[1];
+                  document.getElementById('searchInput').value = secret;
+                  showNotification('QR 코드에서 시크릿을 성공적으로 추출했습니다.', 'success');
+                } else {
+                  // 시크릿을 찾을 수 없는 경우 전체 데이터를 표시
+                  document.getElementById('searchInput').value = code.data;
+                  showNotification('QR 코드를 스캔했지만 시크릿을 찾을 수 없습니다. 전체 데이터를 표시합니다.', 'warning');
+                }
+                
+                // 검색 필터링 실행
+                filterClients();
+              } else {
+                showNotification('QR 코드를 인식할 수 없습니다. 다른 이미지를 시도해주세요.', 'danger');
+              }
+            } catch (error) {
+              console.error('QR 코드 처리 중 오류:', error);
+              showNotification('QR 코드 처리 중 오류가 발생했습니다.', 'danger');
+            }
+          };
+          
+          // 파일 선택 대화상자 열기
+          input.click();
+        }
         
         function filterClients() {
           const query = document.getElementById('searchInput').value.toLowerCase();

@@ -1,0 +1,214 @@
+/* Reset and Base Styles */
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Titlebar */
+.titlebar {
+  height: 40px;
+  background-color: #2c3e50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.titlebar-title {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.titlebar-search {
+  flex: 0 1 400px;
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* QR Scan Button */
+.qr-scan-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-scan-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Search Input */
+.search-input {
+  flex: 1;
+  padding: 5px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background-color: #1e2b38;
+  color: white;
+  outline: none;
+  font-size: 13px;
+}
+
+.search-input:focus {
+  border-color: #4a90e2;
+  background-color: #3a3a3a;
+}
+
+.search-input::placeholder {
+  color: #aaa;
+}
+
+/* Window Controls */
+.window-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.window-control-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.window-control-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-control-button.close:hover {
+  background-color: #e74c3c;
+}
+
+/* Content Area */
+.content {
+  padding: 20px 0;
+}
+
+/* Client List */
+.list-group {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-group-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.list-group-item:hover {
+  background-color: #f9f9f9;
+}
+
+.client-info {
+  flex: 1;
+}
+
+.client-name {
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.client-account {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Buttons */
+.btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  border: 1px solid #bdc3c7;
+  color: #7f8c8d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f5f5f5;
+  border-color: #95a5a6;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 12px 24px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.notification.success {
+  background-color: #2ecc71;
+}
+
+.notification.error {
+  background-color: #e74c3c;
+}
+
+.notification.warning {
+  background-color: #f39c12;
+}
+
+.notification.info {
+  background-color: #3498db;
+}

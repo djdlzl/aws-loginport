@@ -1,6 +1,6 @@
 {
   "name": "aws-login-port",
-  "version": "1.0.31",
+  "version": "1.0.33",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -10,12 +10,19 @@
   "author": "Jaewoo Cho",
   "license": "ISC",
   "dependencies": {
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
+    "ejs": "^3.1.10",
     "electron-store": "^10.1.0",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "googleapis": "^148.0.0",
+    "jimp": "^1.6.0",
+    "jsqr": "^1.4.0",
     "otplib": "^12.0.1",
-    "puppeteer": "^24.11.2"
+    "puppeteer": "^24.11.2",
+    "qrcode": "^1.5.4",
+    "qrcode-reader": "^1.0.4"
   },
   "description": "AWS LoginPort",
   "build": {
