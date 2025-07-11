@@ -14,7 +14,6 @@ let tray = null;
 let serverRunning = false;
 let expressProcess = null; // 백그라운드 app.js 프로세스
 let isUpdateAvailable = false;
-let updateDownloaded = false;
 
 
 // 다운로드한 아이콘 파일 경로 사용
@@ -98,20 +97,20 @@ async function startExpressServer(sheetTitle = null) {
       childEnv.ELECTRON_RUN_AS_NODE = '1';
     }
 
-    // // 앱.js 파일 실행 (spawn 사용해 실시간 로그 수집)
-    // // 사용자 데이터(logs) 폴더에 express.log 작성
-    // const logDir = app.getPath('logs');
-    // try { fs.mkdirSync(logDir, { recursive: true }); } catch {}
-    // const logPath = path.join(logDir, 'express.log');
-    // let logStream;
-    // try {
-    //   logStream = fs.createWriteStream(logPath, { flags: 'a' });
-    // } catch (e) {
-    //   console.warn('로그 파일 생성 실패, 콘솔만 사용:', e);
-    //   logStream = { write() {}, end() {} };
-    // }
+    // 앱.js 파일 실행 (spawn 사용해 실시간 로그 수집)
+    // 사용자 데이터(logs) 폴더에 express.log 작성
+    const logDir = app.getPath('logs');
+    try { fs.mkdirSync(logDir, { recursive: true }); } catch {}
+    const logPath = path.join(logDir, 'express.log');
+    let logStream;
+    try {
+      logStream = fs.createWriteStream(logPath, { flags: 'a' });
+    } catch (e) {
+      console.warn('로그 파일 생성 실패, 콘솔만 사용:', e);
+      logStream = { write() {}, end() {} };
+    }
 
-    const logStream = { write() {}, end() {} };
+    // const logStream = { write() {}, end() {} };
 
     expressProcess = spawn(nodeExec, execArgs, { env: childEnv, shell: false });
 
