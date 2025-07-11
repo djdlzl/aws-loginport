@@ -1,6 +1,6 @@
 {
   "name": "aws-login-port",
-  "version": "1.0.394",
+  "version": "1.0.395",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -64,6 +64,10 @@
       "!**/node_modules/electron-builder"
     ],
     "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
     "asarUnpack": [
       "bespin-464808-5843cc63067d.json",
       "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/chrome.exe",
@@ -72,10 +76,6 @@
       "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/icudtl.dat",
       "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/v8_context_snapshot.bin"
     ]
-  },
-  "directories": {
-    "output": "dist",
-    "buildResources": "build"
   },
   "repository": {
   "type": "git",
