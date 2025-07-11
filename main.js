@@ -429,25 +429,6 @@ autoUpdater.on('update-downloaded', (info) => {
   });
 });
   
-  // 업데이트 다운로드 완료 시
-  autoUpdater.on('update-downloaded', (info) => {
-    updateDownloaded = true;
-    if (mainWindow) {
-      mainWindow.webContents.send('update-downloaded');
-      
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: '업데이트 준비 완료',
-        message: '업데이트가 다운로드되었습니다. 지금 설치하시겠습니까?',
-        buttons: ['나중에', '지금 다시 시작']
-      }).then(({ response }) => {
-        if (response === 1) { // '지금 다시 시작' 버튼 클릭
-          setImmediate(() => autoUpdater.quitAndInstall());
-        }
-      });
-    }
-  });
-  
   // 에러 처리
   autoUpdater.on('error', (err) => {
     console.error('업데이트 오류:', err);
