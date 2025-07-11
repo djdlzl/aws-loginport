@@ -353,10 +353,25 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 function initializeAutoUpdater() {
   // 로그 설정
   autoUpdater.logger = log;
-  autoUpdater.logger.transports.file.level = 'info';
+  autoUpdater.logger.transports.file.level = 'debug';
   
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'djdlzl',
+    repo: 'aws-loginport',
+  });
+
+  console.log('Auto-update feed URL set to:', {
+    owner: 'djdlzl',
+    repo: 'aws-loginport',
+  });
+
   // 업데이트 확인
-  autoUpdater.checkForUpdates();
+  autoUpdater.checkForUpdates().then(() => {
+    console.log('Update check completed');
+  }).catch(err => {
+    console.error('Update check failed:', err);
+  });
   
   // 1시간마다 업데이트 확인
   setInterval(() => {
@@ -416,6 +431,7 @@ app.on('ready', () => {
   if (process.env.NODE_ENV !== 'development') {
     initializeAutoUpdater();
   }
+
   // 캐시 관련 오류 해결을 위한 설정
   app.commandLine.appendSwitch('disable-http-cache');
   
