@@ -381,23 +381,53 @@ function initializeAutoUpdater() {
   }, 3600000);
   
   // 업데이트 가능 시 이벤트
-  autoUpdater.on('update-available', (info) => {
-    isUpdateAvailable = true;
-    if (mainWindow) {
-      mainWindow.webContents.send('update-available');
-      
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: '업데이트 가능',
-        message: '새로운 버전이 있습니다. 지금 다운로드하시겠습니까?',
-        buttons: ['나중에', '지금 업데이트']
-      }).then(({ response }) => {
-        if (response === 1) { // '지금 업데이트' 버튼 클릭
-          autoUpdater.downloadUpdate();
-        }
-      });
+// main.js의 autoUpdater 이벤트 핸들러 부분을 찾아서 수정
+autoUpdater.on('update-available', (info) => {
+  console.log('Update available:', info);
+  isUpdateAvailable = true;
+  
+  // 사용자 정의 다이얼로그 표시
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['업데이트', '나중에'],
+    title: '업데이트 알림',
+    message: '새로운 버전이 있습니다!',
+    detail: `현재 버전: ${app.getVersion()}\n새 버전: ${info.version}\n\n업데이트를 진행하시겠습니까?`,
+    icon: nativeImage.createFromPath(iconPath),
+    defaultId: 0,
+    cancelId: 1
+  };
+
+  dialog.showMessageBox(mainWindow, dialogOpts).then(({ response }) => {
+    if (response === 0) {
+      // 업데이트 다운로드
+      autoUpdater.downloadUpdate();
     }
   });
+});
+
+// 다운로드 완료 시
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Update downloaded:', info);
+  
+  const dialogOpts = {
+    type: 'question',
+    buttons: ['지금 재시작', '나중에'],
+    title: '업데이트 준비 완료',
+    message: '업데이트가 준비되었습니다!',
+    detail: '지금 앱을 재시작하여 업데이트를 적용하시겠습니까?',
+    icon: nativeImage.createFromPath(iconPath),
+    defaultId: 0,
+    cancelId: 1
+  };
+
+  dialog.showMessageBox(mainWindow, dialogOpts).then(({ response }) => {
+    if (response === 0) {
+      // 앱 재시작
+      setImmediate(() => autoUpdater.quitAndInstall());
+    }
+  });
+});
   
   // 업데이트 다운로드 완료 시
   autoUpdater.on('update-downloaded', (info) => {

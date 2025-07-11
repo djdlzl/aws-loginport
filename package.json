@@ -1,6 +1,6 @@
 {
   "name": "aws-login-port",
-  "version": "1.0.39",
+  "version": "1.0.391",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
