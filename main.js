@@ -400,8 +400,8 @@ autoUpdater.on('update-available', (info) => {
 
   dialog.showMessageBox(mainWindow, dialogOpts).then(({ response }) => {
     if (response === 0) {
-      // 업데이트 다운로드
-      autoUpdater.downloadUpdate();
+      // 앱 재시작 (바로가기 유지)
+      setImmediate(() => autoUpdater.quitAndInstall(true, true));
     }
   });
 });

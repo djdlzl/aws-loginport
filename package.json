@@ -1,6 +1,6 @@
 {
   "name": "aws-login-port",
-  "version": "1.0.393",
+  "version": "1.0.394",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -29,10 +29,10 @@
   },
   "description": "AWS LoginPort",
   "build": {
+    "appId": "com.example.aws-login-port",
     "compression": "maximum",
     "npmRebuild": false,
     "removePackageScripts": true,
-    "appId": "com.example.aws-login-port",
     "productName": "AWS LoginPort",
     "publish": [
       {
@@ -53,6 +53,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "AWS LoginPort",
+      "uninstallDisplayName": "AWS LoginPort",
       "deleteAppDataOnUninstall": false
     },
     "files": [
@@ -71,6 +72,10 @@
       "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/icudtl.dat",
       "node_modules/puppeteer/.local-chromium/win64-*/chrome-win64/v8_context_snapshot.bin"
     ]
+  },
+  "directories": {
+    "output": "dist",
+    "buildResources": "build"
   },
   "repository": {
   "type": "git",
