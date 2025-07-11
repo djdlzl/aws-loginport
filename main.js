@@ -1,7 +1,9 @@
-const { app, BrowserWindow, Menu, Tray, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, Tray, ipcMain, nativeImage, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 
 // electron-store 문제 해결을 위해 올바른 방식으로 불러오기
 const Store = require('electron-store').default;
@@ -11,6 +13,8 @@ let mainWindow;
 let tray = null;
 let serverRunning = false;
 let expressProcess = null; // 백그라운드 app.js 프로세스
+let isUpdateAvailable = false;
+let updateDownloaded = false;
 
 
 // 다운로드한 아이콘 파일 경로 사용
@@ -191,6 +195,14 @@ async function startExpressServer(sheetTitle = null) {
 
 // 메인 윈도우 생성
 function createWindow() {
+  // 이미 창이 있고 파괴되지 않았으면 반환
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    return mainWindow;
+  }
+
   // 아이콘 파일 존재 여부 확인
   let iconOption;
   try {
@@ -317,8 +329,94 @@ function saveCredentialsFile(filePath) {
   }
 }
 
+// 단일 인스턴스 잠금
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // 이미 실행 중인 앱이 있으면 종료
+  app.quit();
+  return;
+}
+
+// 두 번째 인스턴스가 실행될 때 호출
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+  // 기존 창이 있으면 포커스
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createWindow();
+  }
+});
+
+// 업데이트 초기화 및 확인
+function initializeAutoUpdater() {
+  // 로그 설정
+  autoUpdater.logger = log;
+  autoUpdater.logger.transports.file.level = 'info';
+  
+  // 업데이트 확인
+  autoUpdater.checkForUpdates();
+  
+  // 1시간마다 업데이트 확인
+  setInterval(() => {
+    if (!isUpdateAvailable) {
+      autoUpdater.checkForUpdates();
+    }
+  }, 3600000);
+  
+  // 업데이트 가능 시 이벤트
+  autoUpdater.on('update-available', (info) => {
+    isUpdateAvailable = true;
+    if (mainWindow) {
+      mainWindow.webContents.send('update-available');
+      
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: '업데이트 가능',
+        message: '새로운 버전이 있습니다. 지금 다운로드하시겠습니까?',
+        buttons: ['나중에', '지금 업데이트']
+      }).then(({ response }) => {
+        if (response === 1) { // '지금 업데이트' 버튼 클릭
+          autoUpdater.downloadUpdate();
+        }
+      });
+    }
+  });
+  
+  // 업데이트 다운로드 완료 시
+  autoUpdater.on('update-downloaded', (info) => {
+    updateDownloaded = true;
+    if (mainWindow) {
+      mainWindow.webContents.send('update-downloaded');
+      
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: '업데이트 준비 완료',
+        message: '업데이트가 다운로드되었습니다. 지금 설치하시겠습니까?',
+        buttons: ['나중에', '지금 다시 시작']
+      }).then(({ response }) => {
+        if (response === 1) { // '지금 다시 시작' 버튼 클릭
+          setImmediate(() => autoUpdater.quitAndInstall());
+        }
+      });
+    }
+  });
+  
+  // 에러 처리
+  autoUpdater.on('error', (err) => {
+    console.error('업데이트 오류:', err);
+    isUpdateAvailable = false;
+  });
+}
+
 // 애플리케이션이 준비되면 실행
 app.on('ready', () => {
+  // 자동 업데이터 초기화
+  if (process.env.NODE_ENV !== 'development') {
+    initializeAutoUpdater();
+  }
   // 캐시 관련 오류 해결을 위한 설정
   app.commandLine.appendSwitch('disable-http-cache');
   
@@ -352,12 +450,18 @@ app.on('ready', () => {
   tray = new Tray(trayIcon);
   const contextMenu = Menu.buildFromTemplate([
     { 
-      label: '열기', 
+      label: '열기',  
       click: () => {
-        if (mainWindow === null) {
-          createWindow();
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          if (mainWindow.isVisible()) {
+            mainWindow.hide();
+          } else {
+            mainWindow.show();
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+          }
         } else {
-          mainWindow.show();
+          mainWindow = createWindow();
         }
       } 
     },
@@ -457,16 +561,25 @@ app.on('ready', () => {
   });
 });
 
-// 모든 창이 닫혔을 때 앱 종료 방지 (트레이에서 실행 중이므로)
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    // 맥이 아닌 경우에도 앱을 종료하지 않음
+// 모든 창이 닫혔을 때의 동작 (트레이로 최소화)
+app.on('window-all-closed', (e) => {
+  // 기본 동작 방지 (앱이 종료되지 않음)
+  e.preventDefault();
+  // macOS가 아니고 메인 윈도우가 있는 경우 숨기기
+  if (process.platform !== 'darwin' && mainWindow) {
+    mainWindow.hide();
   }
 });
 
+// 앱이 활성화될 때 (트레이 아이콘 클릭 등)
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (!mainWindow || mainWindow.isDestroyed()) {
     createWindow();
+  } else {
+    // 이미 창이 있으면 보여주고 포커스
+    mainWindow.show();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
   }
 });
 
