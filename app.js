@@ -81,7 +81,7 @@ function getConfigPath() {
     if (typeof fs !== 'undefined' && !fs.existsSync(configPath)) {
       const defaultConfig = {
         sheet_title: 'SRE1_자동화 고객사 목록',
-        credentials_file: path.join(path.dirname(process.execPath || ''), 'resources', 'app.asar.unpacked', 'bespin-464808-5843cc63067d.json')
+        credentials_file: path.join(path.dirname(process.execPath || ''), 'resources', 'app.asar.unpacked', '')
       };
       
       fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
