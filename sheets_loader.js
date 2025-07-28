@@ -7,7 +7,7 @@ const path = require('path');
 const { google } = require('googleapis');
 
 const DEFAULT_SHEET_TITLE = 'SRE1_자동화 고객사 목록';
-const DEFAULT_CREDENTIAL_FILE = 'bespin-464808-5843cc63067d.json';
+const DEFAULT_CREDENTIAL_FILE = '';
 const EXCLUDE_KEYWORDS = ['고객사', 'issuereporter', 'NCP'];
 
 // 인증 스코프 - Python gspread와 동일한 범위 사용
